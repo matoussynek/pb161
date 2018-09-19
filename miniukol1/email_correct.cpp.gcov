@@ -1,0 +1,173 @@
+        -:    0:Source:email_correct.cpp
+        -:    0:Graph:email_correct.gcno
+        -:    0:Data:email_correct.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:#include <cassert>
+        -:    2:#include <iostream>
+        -:    3:#include <string>
+        -:    4:
+        -:    5:using namespace std;
+        -:    6:
+        -:    7:bool localPartMayContain(size_t pos, bool isEscaped, char c, char prev) {
+       80:    8:	if (isEscaped) {
+        6:    9:		if (c == ' ')
+        2:   10:			return true;
+        4:   11:		if (c == '\\')
+        3:   12:			return true;
+        1:   13:		return false;
+        -:   14:	}
+        -:   15:
+       74:   16:	if (isalnum(c))
+       60:   17:		return true;
+        -:   18:
+       14:   19:	if (c == '.') {
+        5:   20:		if (pos == 0)
+        1:   21:			return false;
+        4:   22:		if (prev == '.')
+        1:   23:			return false;
+        -:   24:
+        3:   25:		return true;
+        -:   26:	}
+        -:   27:
+        9:   28:	if (c == '\\')
+        7:   29:		return true;
+        -:   30:
+        2:   31:	return false;
+       80:   32:}
+        -:   33:
+        -:   34:bool isEmailLocalPart(string const &s) {
+       23:   35:	if (s.empty())
+        1:   36:		return false;
+        -:   37:
+       22:   38:	bool isEscaped = false;
+      194:   39:	for (size_t i = 0; i < s.size(); i++) {
+       80:   40:		char const curr = s[i];
+      240:   41:		char const prev = i == 0 ? 0 : s[i - 1];
+       80:   42:		bool const may = localPartMayContain(i, isEscaped, curr, prev);
+       80:   43:		if (!may)
+        5:   44:			return false;
+        -:   45:
+      220:   46:		isEscaped = !isEscaped && s[i] == '\\';
+       75:   47:	}
+        -:   48:
+       17:   49:	if (isEscaped)
+        1:   50:		return false;
+        -:   51:
+       16:   52:	return true;
+       23:   53:}
+        -:   54:
+        -:   55:bool isAllowedCharacterForDomain(char c) {
+       52:   56:	if (isalnum(c))
+       39:   57:		return true;
+        -:   58:
+       13:   59:	if (c == '-')
+        2:   60:		return true;
+        -:   61:
+       11:   62:	if (c == '.')
+        6:   63:		return true;
+        -:   64:
+        5:   65:	return false;
+       52:   66:}
+        -:   67:
+        -:   68:bool domainContainsOnlyAllowedCharacters(string const &s) {
+      219:   69:	for (char c : s) {
+       52:   70:		if (!isAllowedCharacterForDomain(c))
+        5:   71:			return false;
+        -:   72:	}
+        8:   73:	return true;
+       13:   74:}
+        -:   75:
+        -:   76:bool noTwoConsecutiveDots(string const &s) {
+      172:   77:	for (size_t i = 0; i < s.size(); i++) {
+       95:   78:		if (s[i] == '.' && (i == 0 || s[i - 1] == '.'))
+        2:   79:			return false;
+       71:   80:	}
+       13:   81:	return true;
+       15:   82:}
+        -:   83:
+        -:   84:bool domainLabelIsOk(string const &label) {
+       26:   85:	assert(label.size() != 0);
+        -:   86:
+       13:   87:	if (label[0] == '-')
+        1:   88:		return false;
+       12:   89:	if (label[label.size() - 1] == '-')
+        1:   90:		return false;
+        -:   91:
+       11:   92:	return true;
+       13:   93:}
+        -:   94:
+        -:   95:/**
+        -:   96: * @pre noTwoConsecutiveDots(s);
+        -:   97: */
+        -:   98:bool domainLabelsOk(string const &s) {
+        8:   99:	size_t b = 0;
+       90:  100:	for (size_t i = 0; i < s.size(); i++) {
+       37:  101:		if (s[i] != '.')
+       32:  102:			continue;
+        -:  103:
+        -:  104:		// It was checked earlier, so we can assert that.
+       10:  105:		assert(i != 0);
+       10:  106:		if (!domainLabelIsOk(s.substr(b, i - b)))
+    #####:  107:			return false;
+        5:  108:		b = i + 1;
+        5:  109:	}
+        -:  110:
+        8:  111:	if (s[s.size() - 1] != '.') {
+       16:  112:		if (!domainLabelIsOk(s.substr(b)))
+        2:  113:			return false;
+        6:  114:	}
+        -:  115:
+        6:  116:	return true;
+        8:  117:}
+        -:  118:
+        -:  119:bool lastDomainLabelContainsNonnumericCharacter(string const &s) {
+       12:  120:	assert(!s.empty());
+       18:  121:	size_t const end = s[s.size() - 1] == '.' ? s.size() - 2 : s.size() - 1;
+        6:  122:	size_t const res = s.rfind(".", end);
+       18:  123:	size_t const start = (res == string::npos) ? 0 : res + 1;
+        6:  124:	string const last_label = s.substr(start, 1 + end - start);
+        -:  125:
+       21:  126:	for (char c : last_label) {
+        6:  127:		if (!isdigit(c))
+        5:  128:			return true;
+        -:  129:	}
+        1:  130:	return false;
+        6:  131:}
+        -:  132:
+        -:  133:bool isEmailDomain(string const &s) {
+       16:  134:	if (s.empty())
+        1:  135:		return false;
+       15:  136:	if (!noTwoConsecutiveDots(s))
+        2:  137:		return false;
+       13:  138:	if (!domainContainsOnlyAllowedCharacters(s))
+        5:  139:		return false;
+        8:  140:	if (!domainLabelsOk(s))
+        2:  141:		return false;
+        6:  142:	if (!lastDomainLabelContainsNonnumericCharacter(s))
+        1:  143:		return false;
+        5:  144:	return true;
+       16:  145:}
+        -:  146:
+        -:  147:bool isEmailAddress(string const &s) {
+        -:  148:	// Split it to 'local-part@domain'
+       25:  149:	size_t at_count = 0;
+       25:  150:	size_t at_index = s.size();
+      494:  151:	for (size_t i = 0; i < s.size(); i++) {
+      222:  152:		if (s[i] == '@') {
+       23:  153:			at_count++;
+       23:  154:			at_index = i;
+       23:  155:		};
+      222:  156:	}
+        -:  157:
+       25:  158:	if (at_count != 1)
+        2:  159:		return false;
+        -:  160:
+       46:  161:	if (!isEmailLocalPart(s.substr(0, at_index)))
+        7:  162:		return false;
+        -:  163:
+       32:  164:	if (!isEmailDomain(s.substr(at_index + 1)))
+       11:  165:		return false;
+        -:  166:
+        5:  167:	return true;
+       25:  168:}
