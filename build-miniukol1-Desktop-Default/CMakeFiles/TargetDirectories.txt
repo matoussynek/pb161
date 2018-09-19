@@ -1,0 +1,3 @@
+/home/xsynek3/Documents/pb161/build-miniukol1-Desktop-Default/CMakeFiles/rebuild_cache.dir
+/home/xsynek3/Documents/pb161/build-miniukol1-Desktop-Default/CMakeFiles/mini01.dir
+/home/xsynek3/Documents/pb161/build-miniukol1-Desktop-Default/CMakeFiles/edit_cache.dir

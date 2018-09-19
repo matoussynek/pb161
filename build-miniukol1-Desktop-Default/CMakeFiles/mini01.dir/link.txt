@@ -1,0 +1,1 @@
+/usr/bin/g++   -std=c++14 -Wall -Wextra -pedantic -Wold-style-cast  -rdynamic CMakeFiles/mini01.dir/test_main.cpp.o CMakeFiles/mini01.dir/email_correct.cpp.o CMakeFiles/mini01.dir/tests.cpp.o  -o mini01 
