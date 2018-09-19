@@ -31,4 +31,5 @@ TEST_CASE("Email address tests") {
 	CHECK(!isEmailAddress("A\\\\ @aa.aa"));
 	CHECK(isEmailAddress("a\\\\\\ @aa.aa"));
 	CHECK(!isEmailAddress("A\\\\\\@aa.aa"));
+        CHECK(!isEmailAddress("??@aa.aa"));
 }
